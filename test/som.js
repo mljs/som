@@ -58,6 +58,19 @@ describe('SOM', function () {
         }
         console.log('train over')
     });
+    it('should work SOM 3', function () {
+        var som = new SOM(20,20, {
+            fields: {
+                r: [0, 255],
+                g: [0, 255],
+                b: [0, 255]
+            },
+            iterations: 10,
+            method: 'traverse'
+        });
+        var data = getRandomData(1000);
+        som.train(data);
+    });
 });
 
 function getRandomData(qty) {

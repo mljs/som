@@ -10,7 +10,8 @@ var defaultOptions = {
     iterations: 1000,
     learningRate: 0.1,
     gridType: 'rectangular',
-    torus: true
+    torus: true,
+    method: 'random'
 };
 
 function SOM(x, y, options) {
@@ -52,12 +53,14 @@ function SOM(x, y, options) {
     this.nodeType = options.gridType === 'rectangular' ? NodeSquare : NodeHexagonal;
     this.distanceMethod = options.torus ? 'getDistanceTorus' : 'getDistance';
 
-    this.initNodes();
+    this.algorithmMethod = options.method;
+
+    this._initNodes();
 
     this.done = false;
 }
 
-SOM.prototype.initNodes = function initNodes() {
+SOM.prototype._initNodes = function initNodes() {
 
     var SOMNode = this.nodeType;
     this.nodes = new Array(this.numNodes);
@@ -101,20 +104,23 @@ SOM.prototype.setTraining = function setTraining(trainingSet) {
 
 SOM.prototype.trainOne = function trainOne() {
     if (this.done) {
+
         return false;
+
     } else if (this.numIterations-- > 0) {
 
-        var i, bmu, trainingValue, neighbourhoodRadius, influence;
-        trainingValue = getRandomValue(this.trainingSet, this.randomizer);
-        bmu = this.findBestMatchingUnit(trainingValue);
+        var neighbourhoodRadius = this.mapRadius * Math.exp(-this.iterationCount / this.timeConstant),
+            trainingValue;
 
-        neighbourhoodRadius = this.mapRadius * Math.exp(-this.iterationCount / this.timeConstant);
+        if (this.algorithmMethod === 'random') {
+            // Pick a random value of the training set at each step
+            trainingValue = getRandomValue(this.trainingSet, this.randomizer);
+            this._adjust(trainingValue, neighbourhoodRadius);
 
-        for (i = 0; i < this.nodes.length; i++) {
-            var dist = bmu[this.distanceMethod](this.nodes[i]);
-            if (dist < neighbourhoodRadius) {
-                influence = Math.exp(-dist / (2 * neighbourhoodRadius));
-                this.nodes[i].adjustWeights(trainingValue, this.learningRate, influence);
+        } else {
+            // Traverse each input vector
+            for (var j = 0; j < this.trainingSet.length; j++) {
+                this._adjust(this.trainingSet[j], neighbourhoodRadius);
             }
         }
 
@@ -125,8 +131,22 @@ SOM.prototype.trainOne = function trainOne() {
         return true;
 
     } else {
+
         this.done = true;
         return false;
+
+    }
+};
+
+SOM.prototype._adjust = function adjust(trainingValue, neighbourhoodRadius) {
+    var i, dist, influence;
+    var bmu = this._findBestMatchingUnit(trainingValue);
+    for (i = 0; i < this.nodes.length; i++) {
+        dist = bmu[this.distanceMethod](this.nodes[i]);
+        if (dist < neighbourhoodRadius) {
+            influence = Math.exp(-dist / (2 * neighbourhoodRadius));
+            this.nodes[i].adjustWeights(trainingValue, this.learningRate, influence);
+        }
     }
 };
 
@@ -150,7 +170,7 @@ SOM.prototype.getConvertedNodes = function getConvertedNodes() {
     return result;
 };
 
-SOM.prototype.findBestMatchingUnit = function findBestMatchingUnit(candidate) {
+SOM.prototype._findBestMatchingUnit = function findBestMatchingUnit(candidate) {
 
     var bmu,
         lowest = Infinity,
