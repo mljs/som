@@ -9,7 +9,8 @@ var defaultOptions = {
     distance: squareEuclidean,
     iterations: 1000,
     learningRate: 0.1,
-    gridType: 'rectangular'
+    gridType: 'rectangular',
+    torus: true
 };
 
 function SOM(x, y, options) {
@@ -49,6 +50,8 @@ function SOM(x, y, options) {
     this.timeConstant = this.numIterations / Math.log(this.mapRadius);
 
     this.nodeType = options.gridType === 'rectangular' ? NodeSquare : NodeHexagonal;
+    this.distanceMethod = options.torus ? 'getDistanceTorus' : 'getDistance';
+
     this.initNodes();
 
     this.done = false;
@@ -58,13 +61,27 @@ SOM.prototype.initNodes = function initNodes() {
 
     var SOMNode = this.nodeType;
     this.nodes = new Array(this.numNodes);
+    var gridDim;
+    if (this.nodeType === NodeSquare) {
+        gridDim = {
+            x: this.x,
+            y: this.y
+        };
+    } else {
+        var hx = this.x - Math.floor(this.y / 2);
+        gridDim = {
+            x: hx,
+            y: this.y,
+            z: - (0 - hx - this.y)
+        }
+    }
     for (var i = 0; i < this.x; i++) {
         for (var j = 0; j < this.y; j++) {
             var weights = new Array(this.numWeights);
             for (var k = 0; k < this.numWeights; k++) {
                 weights[k] = this.randomizer();
             }
-            this.nodes[i * this.x + j] = new SOMNode(i, j, weights);
+            this.nodes[i * this.x + j] = new SOMNode(i, j, weights, gridDim);
         }
     }
 
@@ -94,7 +111,7 @@ SOM.prototype.trainOne = function trainOne() {
         neighbourhoodRadius = this.mapRadius * Math.exp(-this.iterationCount / this.timeConstant);
 
         for (i = 0; i < this.nodes.length; i++) {
-            var dist = bmu.getDistance(this.nodes[i]);
+            var dist = bmu[this.distanceMethod](this.nodes[i]);
             if (dist < neighbourhoodRadius) {
                 influence = Math.exp(-dist / (2 * neighbourhoodRadius));
                 this.nodes[i].adjustWeights(trainingValue, this.learningRate, influence);
