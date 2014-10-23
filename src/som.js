@@ -7,9 +7,9 @@ var defaultOptions = {
     fields: 3,
     randomizer: Math.random,
     distance: squareEuclidean,
-    iterations: 1000,
+    iterations: 10,
     learningRate: 0.1,
-    gridType: 'rectangular',
+    gridType: 'rect',
     torus: true,
     method: 'random'
 };
@@ -32,7 +32,6 @@ function SOM(x, y, options) {
     this.distance = options.distance;
 
     this.iterationCount = 0;
-    this.numIterations = options.iterations;
 
     this.startLearningRate = this.learningRate = options.learningRate;
 
@@ -48,9 +47,8 @@ function SOM(x, y, options) {
     }
 
     this.mapRadius = Math.floor(Math.max(x, y) / 2);
-    this.timeConstant = this.numIterations / Math.log(this.mapRadius);
 
-    this.nodeType = options.gridType === 'rectangular' ? NodeSquare : NodeHexagonal;
+    this.nodeType = options.gridType === 'rect' ? NodeSquare : NodeHexagonal;
     this.distanceMethod = options.torus ? 'getDistanceTorus' : 'getDistance';
 
     this.algorithmMethod = options.method;
@@ -75,7 +73,7 @@ SOM.prototype._initNodes = function initNodes() {
         gridDim = {
             x: hx,
             y: this.y,
-            z: - (0 - hx - this.y)
+            z: -(0 - hx - this.y)
         }
     }
     for (var i = 0; i < this.x; i++) {
@@ -92,13 +90,15 @@ SOM.prototype._initNodes = function initNodes() {
 
 SOM.prototype.setTraining = function setTraining(trainingSet) {
     var convertedSet = trainingSet;
-    var i;
+    var i, l = trainingSet.length;
     if (this.extractor) {
         convertedSet = new Array(trainingSet);
-        for (i = 0; i < trainingSet.length; i++) {
+        for (i = 0; i < l; i++) {
             convertedSet[i] = this.extractor(trainingSet[i]);
         }
     }
+    this.numIterations = this.iterations * l;
+    this.timeConstant = this.numIterations / Math.log(this.mapRadius);
     this.trainingSet = convertedSet;
 };
 
@@ -112,17 +112,13 @@ SOM.prototype.trainOne = function trainOne() {
         var neighbourhoodRadius = this.mapRadius * Math.exp(-this.iterationCount / this.timeConstant),
             trainingValue;
 
-        if (this.algorithmMethod === 'random') {
-            // Pick a random value of the training set at each step
+        if (this.algorithmMethod === 'random') { // Pick a random value of the training set at each step
             trainingValue = getRandomValue(this.trainingSet, this.randomizer);
-            this._adjust(trainingValue, neighbourhoodRadius);
-
-        } else {
-            // Traverse each input vector
-            for (var j = 0; j < this.trainingSet.length; j++) {
-                this._adjust(this.trainingSet[j], neighbourhoodRadius);
-            }
+        } else { // Get next input vector
+            trainingValue = this.trainingSet[this.iterationCount % this.trainingSet.length];
         }
+
+        this._adjust(trainingValue, neighbourhoodRadius);
 
         this.learningRate = this.startLearningRate * Math.exp(-this.iterationCount / this.numIterations);
 
@@ -151,10 +147,11 @@ SOM.prototype._adjust = function adjust(trainingValue, neighbourhoodRadius) {
 };
 
 SOM.prototype.train = function train(trainingSet) {
-
-    this.setTraining(trainingSet);
-    while(this.trainOne()){}
-
+    if (!this.done) {
+        this.setTraining(trainingSet);
+        while (this.trainOne()) {
+        }
+    }
 };
 
 SOM.prototype.getConvertedNodes = function getConvertedNodes() {
@@ -165,7 +162,7 @@ SOM.prototype.getConvertedNodes = function getConvertedNodes() {
         if (!result[node.x]) {
             result[node.x] = [];
         }
-        result[node.x][node.y] = this.creator(node.weights);
+        result[node.x][node.y] = this.creator ? this.creator(node.weights) : node.weights;
     }
     return result;
 };

@@ -4,20 +4,20 @@ var SOM = require('../');
 
 describe('SOM', function () {
     it('should init correctly', function () {
-        var som = new SOM(4,4);
+        var som = new SOM(4, 4);
         (function () {
             var som = new SOM(4);
         }).should.throw('x and y must be positive');
     });
     it('should work SOM 1', function () {
-        var som = new SOM(40,40, {
+        var som = new SOM(40, 40, {
             fields: {
                 r: [0, 255],
                 g: [0, 255],
                 b: [0, 255]
             },
             iterations: 1000,
-            gridType: 'rectangular'
+            gridType: 'rect'
         });
         var data = [
             { r: 255, g: 0, b: 0 },
@@ -27,19 +27,19 @@ describe('SOM', function () {
             { r: 255, g: 255, b: 255},
             { r: 255, g: 255, b: 0 },
             { r: 255, g: 0, b: 255},
-            { r: 0, g:255, b:255}
+            { r: 0, g: 255, b: 255}
         ];
         som.train(data);
     });
     it('should work SOM 2', function () {
-        var som = new SOM(40,40, {
+        var som = new SOM(40, 40, {
             fields: {
                 r: [0, 255],
                 g: [0, 255],
                 b: [0, 255]
             },
             iterations: 10,
-            gridType: 'rectangular'
+            gridType: 'rect'
         });
         var data = [
             { r: 255, g: 0, b: 0 },
@@ -49,17 +49,17 @@ describe('SOM', function () {
             { r: 255, g: 255, b: 255},
             { r: 255, g: 255, b: 0 },
             { r: 255, g: 0, b: 255},
-            { r: 0, g:255, b:255}
+            { r: 0, g: 255, b: 255}
         ];
         som.setTraining(data);
-        console.log('train')
-        while(som.trainOne()) {
-            console.log(som.iterationCount)
+        console.log('train');
+        while (som.trainOne()) {
+            console.log(som.iterationCount);
         }
-        console.log('train over')
+        console.log('train over');
     });
     it('should work SOM 3', function () {
-        var som = new SOM(20,20, {
+        var som = new SOM(20, 20, {
             fields: {
                 r: [0, 255],
                 g: [0, 255],
@@ -75,7 +75,7 @@ describe('SOM', function () {
 
 function getRandomData(qty) {
     var data = new Array(qty);
-    for(var i = 0; i < qty; i++) {
+    for (var i = 0; i < qty; i++) {
         data[i] = getRandomColor();
     }
     return data;
@@ -86,7 +86,7 @@ function getRandomColor() {
         r: getRandomValue(),
         g: getRandomValue(),
         b: getRandomValue()
-    }
+    };
 }
 
 function getRandomValue() {
