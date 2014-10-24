@@ -93,6 +93,45 @@ while(som.trainOne()) {
 }
 ```
 
+### predict(data)
+
+Returns for each data point the coordinates of the corresponding best matching unit (BMU) on the grid
+
+__Arguments__
+
+* `data` - Data point or array of data points.
+
+__Example__
+
+```js
+// create and train the som
+var result1 = som.predict({ r: 45, g: 209, b: 100 });
+// result1 = [ 2, 26 ]
+var result2 = som.predict([{ r: 45, g: 209, b: 100 }, { r: 155, g: 22, b: 12 }]);
+// result2 = [ [ 2, 26 ], [ 33, 12 ] ]
+```
+
+### getQuantizationError()
+
+Returns the mean of the euclidean distance between each point of the training set and its corresponding BMU. This number can be used to compare several runs of the same SOM.
+
+### export([includeDistance])
+
+Exports the model to a JSON object that can be written to disk and reloaded
+
+__Arguments__
+
+* `includeDistance` - Boolean indicating if the distance function should be included in the model as a String (not recommended). Note that there is no need to include the default function and that it cannot work if the function depends on variables that are out of its scope (default: false).
+
+### SOM.load(model, [distanceFunction])
+
+Returns a new SOM instance based on the `model`. If the model was created with a custom distance function, the `distance` argument should be this function.
+
+__Arguments__
+
+* `model` - JSON object generated with `som.export()`
+* `distanceFunction` - Optionally provide the distance function used to create the model.
+
 ## License
 
   MIT

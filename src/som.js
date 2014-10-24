@@ -14,68 +14,129 @@ var defaultOptions = {
     method: 'random'
 };
 
-function SOM(x, y, options) {
-    if (!(x > 0 && y > 0)) {
-        throw new Error('x and y must be positive');
-    }
-    options = options || {};
-    for (var i in defaultOptions) {
-        if (!options.hasOwnProperty(i)) {
-            options[i] = defaultOptions[i];
-        }
-    }
+function SOM(x, y, options, reload) {
+
     this.x = x;
     this.y = y;
 
-    this.randomizer = options.randomizer;
-    this.distance = options.distance;
+    this.options = {};
+    for (var i in defaultOptions) {
+        if (options.hasOwnProperty(i)) {
+            this.options[i] = options[i];
+        } else {
+            this.options[i] = defaultOptions[i];
+        }
+    }
 
-    this.iterationCount = 0;
-    this.iterations = options.iterations;
-
-    this.startLearningRate = this.learningRate = options.learningRate;
-
-    if (typeof options.fields === 'number') {
-        this.numWeights = options.fields;
+    if (typeof this.options.fields === 'number') {
+        this.numWeights = this.options.fields;
         this.extractor = null;
     } else {
-        var fields = Object.keys(options.fields);
+        var fields = Object.keys(this.options.fields);
         this.numWeights = fields.length;
-        var converters = getConverters(fields, options.fields);
+        var converters = getConverters(fields, this.options.fields);
         this.extractor = converters.extractor;
         this.creator = converters.creator;
     }
 
+    this.nodeType = this.options.gridType === 'rect' ? NodeSquare : NodeHexagonal;
+    this.distanceMethod = this.options.torus ? 'getDistanceTorus' : 'getDistance';
+
+    this.distance = this.options.distance;
+
+    if (reload === true) { // For model loading
+        this.done = true;
+        return;
+    }
+    if (!(x > 0 && y > 0)) {
+        throw new Error('x and y must be positive');
+    }
+
+    this.randomizer = this.options.randomizer;
+
+    this.iterationCount = 0;
+    this.iterations = this.options.iterations;
+
+    this.startLearningRate = this.learningRate = this.options.learningRate;
+
     this.mapRadius = Math.floor(Math.max(x, y) / 2);
 
-    this.nodeType = options.gridType === 'rect' ? NodeSquare : NodeHexagonal;
-    this.distanceMethod = options.torus ? 'getDistanceTorus' : 'getDistance';
-
-    this.algorithmMethod = options.method;
+    this.algorithmMethod = this.options.method;
 
     this._initNodes();
 
     this.done = false;
 }
 
-SOM.prototype._initNodes = function initNodes() {
-    var i, j, k;
-    var SOMNode = this.nodeType;
-    this.nodes = new Array(this.x);
-    var gridDim;
+SOM.load = function loadModel(model, distance) {
+    if(model.name === 'SOM') {
+        var x = model.data.length,
+            y = model.data[0].length;
+        if(distance) {
+            model.options.distance = distance;
+        } else if(model.options.distance) {
+            model.options.distance = eval('('+model.options.distance+')');
+        }
+        var som = new SOM(x, y, model.options, true);
+        som.nodes = new Array(x);
+        var gridDim = som._getGridDim();
+        for (var i = 0; i < x; i++) {
+            som.nodes[i] = new Array(y);
+            for (var j = 0; j < y; j++) {
+                som.nodes[i][j] = new som.nodeType(i, j, model.data[i][j], gridDim);
+            }
+        }
+        return som;
+    } else {
+        throw new Error('expecting a SOM model');
+    }
+};
+
+SOM.prototype.export = function exportModel(includeDistance) {
+    if (!this.done) {
+        throw new Error('model is not ready yet');
+    }
+    var model = {
+        name: 'SOM'
+    };
+    model.options = {
+        fields: this.options.fields,
+        gridType: this.options.gridType,
+        torus: this.options.torus
+    };
+    model.data = new Array(this.x);
+    for (var i = 0; i < this.x; i++) {
+        model.data[i] = new Array(this.y);
+        for (var j = 0; j < this.y; j++) {
+            model.data[i][j] = this.nodes[i][j].weights;
+        }
+    }
+    if (includeDistance) {
+        model.options.distance = this.distance.toString();
+    }
+    return model;
+};
+
+SOM.prototype._getGridDim = function getGridDim() {
     if (this.nodeType === NodeSquare) {
-        gridDim = {
+        return {
             x: this.x,
             y: this.y
         };
     } else {
         var hx = this.x - Math.floor(this.y / 2);
-        gridDim = {
+        return {
             x: hx,
             y: this.y,
             z: -(0 - hx - this.y)
         }
     }
+};
+
+SOM.prototype._initNodes = function initNodes() {
+    var i, j, k;
+    this.nodes = new Array(this.x);
+    var gridDim = this._getGridDim();
     for (i = 0; i < this.x; i++) {
         this.nodes[i] = new Array(this.y);
         for (j = 0; j < this.y; j++) {
@@ -83,7 +144,7 @@ SOM.prototype._initNodes = function initNodes() {
             for (k = 0; k < this.numWeights; k++) {
                 weights[k] = this.randomizer();
             }
-            this.nodes[i][j] = new SOMNode(i, j, weights, gridDim);
+            this.nodes[i][j] = new this.nodeType(i, j, weights, gridDim);
         }
     }
 };
