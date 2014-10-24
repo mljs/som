@@ -200,8 +200,8 @@ SOM.prototype._findBestMatchingUnit = function findBestMatchingUnit(candidate) {
 
 };
 
-SOM.prototype.predict = function (data) {
-    if (Array.isArray(data)) {
+SOM.prototype.predict = function predict(data) {
+    if (data instanceof Array) {
         var self = this;
         return data.map(function (element) {
             return self._predict(element);
@@ -211,12 +211,25 @@ SOM.prototype.predict = function (data) {
     }
 };
 
-SOM.prototype._predict = function (element) {
-    if (this.extractor) {
+SOM.prototype._predict = function _predict(element) {
+    if (!(element instanceof Array)) {
         element = this.extractor(element);
     }
     var bmu = this._findBestMatchingUnit(element);
     return [bmu.x, bmu.y];
+};
+
+// As seen in http://www.scholarpedia.org/article/Kohonen_network
+SOM.prototype.getQuantizationError = function getQuantizationError() {
+    var data = this.trainingSet,
+        l = data.length,
+        sum = 0,
+        bmu;
+    for (var i = 0; i < l; i++) {
+        bmu = this._findBestMatchingUnit(data[i]);
+        sum += Math.sqrt(squareEuclidean(data[i], bmu.weights));
+    }
+    return sum / l;
 };
 
 function getConverters(fields, fieldsOpt) {

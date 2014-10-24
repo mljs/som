@@ -54,6 +54,7 @@ describe('SOM', function () {
         som.setTraining(data);
         while (som.trainOne()) {
         }
+        var result = som.predict(som.trainingSet);
     });
     it('should work SOM 3', function () {
         var som = new SOM(20, 20, {
