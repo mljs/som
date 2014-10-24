@@ -90,6 +90,9 @@ SOM.prototype._initNodes = function initNodes() {
 };
 
 SOM.prototype.setTraining = function setTraining(trainingSet) {
+    if (this.trainingSet) {
+        throw new Error('training set has already been set');
+    }
     var convertedSet = trainingSet;
     var i, l = trainingSet.length;
     if (this.extractor) {
@@ -99,8 +102,12 @@ SOM.prototype.setTraining = function setTraining(trainingSet) {
         }
     }
     this.numIterations = this.iterations * l;
-    this.timeConstantRandom = this.numIterations / Math.log(this.mapRadius);
-    this.timeConstantSeq = l / Math.log(this.mapRadius);
+
+    if (this.algorithmMethod === 'random') {
+        this.timeConstant = this.numIterations / Math.log(this.mapRadius);
+    } else {
+        this.timeConstant = l / Math.log(this.mapRadius);
+    }
     this.trainingSet = convertedSet;
 };
 
@@ -116,13 +123,13 @@ SOM.prototype.trainOne = function trainOne() {
             trainingSetFactor;
 
         if (this.algorithmMethod === 'random') { // Pick a random value of the training set at each step
-            neighbourhoodRadius = this.mapRadius * Math.exp(-this.iterationCount / this.timeConstantRandom);
+            neighbourhoodRadius = this.mapRadius * Math.exp(-this.iterationCount / this.timeConstant);
             trainingValue = getRandomValue(this.trainingSet, this.randomizer);
             this._adjust(trainingValue, neighbourhoodRadius);
             this.learningRate = this.startLearningRate * Math.exp(-this.iterationCount / this.numIterations);
         } else { // Get next input vector
             trainingSetFactor = - Math.floor(this.iterationCount / this.trainingSet.length);
-            neighbourhoodRadius = this.mapRadius * Math.exp(trainingSetFactor / this.timeConstantSeq);
+            neighbourhoodRadius = this.mapRadius * Math.exp(trainingSetFactor / this.timeConstant);
             trainingValue = this.trainingSet[this.iterationCount % this.trainingSet.length];
             this._adjust(trainingValue, neighbourhoodRadius);
             if (((this.iterationCount + 1) % this.trainingSet.length) === 0) {
@@ -191,6 +198,25 @@ SOM.prototype._findBestMatchingUnit = function findBestMatchingUnit(candidate) {
 
     return bmu;
 
+};
+
+SOM.prototype.predict = function (data) {
+    if (Array.isArray(data)) {
+        var self = this;
+        return data.map(function (element) {
+            return self._predict(element);
+        });
+    } else {
+        return this._predict(data);
+    }
+};
+
+SOM.prototype._predict = function (element) {
+    if (this.extractor) {
+        element = this.extractor(element);
+    }
+    var bmu = this._findBestMatchingUnit(element);
+    return [bmu.x, bmu.y];
 };
 
 function getConverters(fields, fieldsOpt) {
