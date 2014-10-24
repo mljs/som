@@ -32,6 +32,7 @@ function SOM(x, y, options) {
     this.distance = options.distance;
 
     this.iterationCount = 0;
+    this.iterations = options.iterations;
 
     this.startLearningRate = this.learningRate = options.learningRate;
 
@@ -98,7 +99,8 @@ SOM.prototype.setTraining = function setTraining(trainingSet) {
         }
     }
     this.numIterations = this.iterations * l;
-    this.timeConstant = this.numIterations / Math.log(this.mapRadius);
+    this.timeConstantRandom = this.numIterations / Math.log(this.mapRadius);
+    this.timeConstantSeq = l / Math.log(this.mapRadius);
     this.trainingSet = convertedSet;
 };
 
@@ -109,18 +111,24 @@ SOM.prototype.trainOne = function trainOne() {
 
     } else if (this.numIterations-- > 0) {
 
-        var neighbourhoodRadius = this.mapRadius * Math.exp(-this.iterationCount / this.timeConstant),
-            trainingValue;
+        var neighbourhoodRadius,
+            trainingValue,
+            trainingSetFactor;
 
         if (this.algorithmMethod === 'random') { // Pick a random value of the training set at each step
+            neighbourhoodRadius = this.mapRadius * Math.exp(-this.iterationCount / this.timeConstantRandom);
             trainingValue = getRandomValue(this.trainingSet, this.randomizer);
+            this._adjust(trainingValue, neighbourhoodRadius);
+            this.learningRate = this.startLearningRate * Math.exp(-this.iterationCount / this.numIterations);
         } else { // Get next input vector
+            trainingSetFactor = - Math.floor(this.iterationCount / this.trainingSet.length);
+            neighbourhoodRadius = this.mapRadius * Math.exp(trainingSetFactor / this.timeConstantSeq);
             trainingValue = this.trainingSet[this.iterationCount % this.trainingSet.length];
+            this._adjust(trainingValue, neighbourhoodRadius);
+            if (((this.iterationCount + 1) % this.trainingSet.length) === 0) {
+                this.learningRate = this.startLearningRate * Math.exp(trainingSetFactor / Math.floor(this.numIterations / this.trainingSet.length));
+            }
         }
-
-        this._adjust(trainingValue, neighbourhoodRadius);
-
-        this.learningRate = this.startLearningRate * Math.exp(-this.iterationCount / this.numIterations);
 
         this.iterationCount++;
 

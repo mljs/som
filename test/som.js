@@ -52,11 +52,8 @@ describe('SOM', function () {
             { r: 0, g: 255, b: 255}
         ];
         som.setTraining(data);
-        console.log('train');
         while (som.trainOne()) {
-            console.log(som.iterationCount);
         }
-        console.log('train over');
     });
     it('should work SOM 3', function () {
         var som = new SOM(20, 20, {
