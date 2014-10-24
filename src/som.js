@@ -26,7 +26,6 @@ function SOM(x, y, options) {
     }
     this.x = x;
     this.y = y;
-    this.numNodes = x * y;
 
     this.randomizer = options.randomizer;
     this.distance = options.distance;
@@ -60,9 +59,9 @@ function SOM(x, y, options) {
 }
 
 SOM.prototype._initNodes = function initNodes() {
-
+    var i, j, k;
     var SOMNode = this.nodeType;
-    this.nodes = new Array(this.numNodes);
+    this.nodes = new Array(this.x);
     var gridDim;
     if (this.nodeType === NodeSquare) {
         gridDim = {
@@ -77,16 +76,16 @@ SOM.prototype._initNodes = function initNodes() {
             z: -(0 - hx - this.y)
         }
     }
-    for (var i = 0; i < this.x; i++) {
-        for (var j = 0; j < this.y; j++) {
+    for (i = 0; i < this.x; i++) {
+        this.nodes[i] = new Array(this.y);
+        for (j = 0; j < this.y; j++) {
             var weights = new Array(this.numWeights);
-            for (var k = 0; k < this.numWeights; k++) {
+            for (k = 0; k < this.numWeights; k++) {
                 weights[k] = this.randomizer();
             }
-            this.nodes[i * this.x + j] = new SOMNode(i, j, weights, gridDim);
+            this.nodes[i][j] = new SOMNode(i, j, weights, gridDim);
         }
     }
-
 };
 
 SOM.prototype.setTraining = function setTraining(trainingSet) {
@@ -150,15 +149,40 @@ SOM.prototype.trainOne = function trainOne() {
 };
 
 SOM.prototype._adjust = function adjust(trainingValue, neighbourhoodRadius) {
-    var i, dist, influence;
+    var x, y, dist, influence;
     var bmu = this._findBestMatchingUnit(trainingValue);
-    for (i = 0; i < this.nodes.length; i++) {
-        dist = bmu[this.distanceMethod](this.nodes[i]);
-        if (dist < neighbourhoodRadius) {
-            influence = Math.exp(-dist / (2 * neighbourhoodRadius));
-            this.nodes[i].adjustWeights(trainingValue, this.learningRate, influence);
+
+    var radiusLimit = Math.floor(neighbourhoodRadius);
+    var xMin = bmu.x - radiusLimit,
+        xMax = bmu.x + radiusLimit,
+        yMin = bmu.y - radiusLimit,
+        yMax = bmu.y + radiusLimit;
+
+    for (x = xMin; x <= xMax; x++) {
+        var theX = x;
+        if (x < 0) {
+            theX += this.x;
+        } else if (x >= this.x) {
+            theX -= this.x;
+        }
+        for (y = yMin; y <= yMax; y++) {
+            var theY = y;
+            if (y < 0) {
+                theY += this.y;
+            } else if (y >= this.y) {
+                theY -= this.y;
+            }
+
+            dist = bmu[this.distanceMethod](this.nodes[theX][theY]);
+
+            if (dist < neighbourhoodRadius) {
+                influence = Math.exp(-dist / (2 * neighbourhoodRadius));
+                this.nodes[theX][theY].adjustWeights(trainingValue, this.learningRate, influence);
+            }
+
         }
     }
+
 };
 
 SOM.prototype.train = function train(trainingSet) {
@@ -170,14 +194,13 @@ SOM.prototype.train = function train(trainingSet) {
 };
 
 SOM.prototype.getConvertedNodes = function getConvertedNodes() {
-    var nodes = this.nodes;
-    var result = [];
-    for (var i = 0; i < nodes.length; i++) {
-        var node = nodes[i];
-        if (!result[node.x]) {
-            result[node.x] = [];
+    var result = new Array(this.x);
+    for (var i = 0; i < this.x; i++) {
+        result[i] = new Array(this.y);
+        for (var j = 0; j < this.y; j++) {
+            var node = this.nodes[i][j];
+            result[i][j] = this.creator ? this.creator(node.weights) : node.weights;
         }
-        result[node.x][node.y] = this.creator ? this.creator(node.weights) : node.weights;
     }
     return result;
 };
@@ -188,11 +211,13 @@ SOM.prototype._findBestMatchingUnit = function findBestMatchingUnit(candidate) {
         lowest = Infinity,
         dist;
 
-    for (var i = 0; i < this.numNodes; i++) {
-        dist = this.distance(this.nodes[i].weights, candidate);
-        if (dist < lowest) {
-            lowest = dist;
-            bmu = this.nodes[i];
+    for (var i = 0; i < this.x; i++) {
+        for (var j = 0; j < this.y; j++) {
+            dist = this.distance(this.nodes[i][j].weights, candidate);
+            if (dist < lowest) {
+                lowest = dist;
+                bmu = this.nodes[i][j];
+            }
         }
     }
 
