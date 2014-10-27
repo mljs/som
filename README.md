@@ -93,13 +93,14 @@ while(som.trainOne()) {
 }
 ```
 
-### predict(data)
+### predict(data, [computePosition])
 
 Returns for each data point the coordinates of the corresponding best matching unit (BMU) on the grid
 
 __Arguments__
 
 * `data` - Data point or array of data points.
+* `computePosition` - True if you want to compute the position of the point in the cell, using the direct neighbors (default: false). This option is currently only implemented for rectangular grids.
 
 __Example__
 

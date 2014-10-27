@@ -59,7 +59,7 @@ describe('SOM', function () {
         }
         var result = som.predict(som.trainingSet);
     });
-    it('should work SOM 3', function () {
+    it.skip('should work SOM 3', function () {
         var som = new SOM(20, 20, {
             fields: {
                 r: [0, 255],
@@ -73,7 +73,7 @@ describe('SOM', function () {
         som.train(data);
         console.log(som.times)
     });
-    it.skip('should export and reload correctly the model', function () {
+    it('should export and reload correctly the model', function () {
         var som = new SOM(20, 20, {
             fields: {
                 r: [0, 255],

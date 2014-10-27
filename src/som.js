@@ -19,6 +19,7 @@ function SOM(x, y, options, reload) {
     this.x = x;
     this.y = y;
 
+    options = options || {};
     this.options = {};
     for (var i in defaultOptions) {
         if (options.hasOwnProperty(i)) {
@@ -39,10 +40,28 @@ function SOM(x, y, options, reload) {
         this.creator = converters.creator;
     }
 
-    this.nodeType = this.options.gridType === 'rect' ? NodeSquare : NodeHexagonal;
-    this.distanceMethod = this.options.torus ? 'getDistanceTorus' : 'getDistance';
+    if (this.options.gridType === 'rect') {
+        this.nodeType = NodeSquare;
+        this.gridDim = {
+            x: x,
+            y: y
+        };
+    } else {
+        this.nodeType = NodeHexagonal;
+        var hx = this.x - Math.floor(this.y / 2);
+        this.gridDim = {
+            x: hx,
+            y: this.y,
+            z: -(0 - hx - this.y)
+        };
+    }
+
+    this.torus = this.options.torus;
+    this.distanceMethod = this.torus ? 'getDistanceTorus' : 'getDistance';
 
     this.distance = this.options.distance;
+
+    this.maxDistance = getMaxDistance(this.distance, this.numWeights);
 
     if (reload === true) { // For model loading
         this.done = true;
@@ -84,11 +103,10 @@ SOM.load = function loadModel(model, distance) {
         }
         var som = new SOM(x, y, model.options, true);
         som.nodes = new Array(x);
-        var gridDim = som._getGridDim();
         for (var i = 0; i < x; i++) {
             som.nodes[i] = new Array(y);
             for (var j = 0; j < y; j++) {
-                som.nodes[i][j] = new som.nodeType(i, j, model.data[i][j], gridDim);
+                som.nodes[i][j] = new som.nodeType(i, j, model.data[i][j], som);
             }
         }
         return som;
@@ -122,27 +140,10 @@ SOM.prototype.export = function exportModel(includeDistance) {
     return model;
 };
 
-SOM.prototype._getGridDim = function getGridDim() {
-    if (this.nodeType === NodeSquare) {
-        return {
-            x: this.x,
-            y: this.y
-        };
-    } else {
-        var hx = this.x - Math.floor(this.y / 2);
-        return {
-            x: hx,
-            y: this.y,
-            z: -(0 - hx - this.y)
-        }
-    }
-};
-
 SOM.prototype._initNodes = function initNodes() {
     var now = Date.now(),
         i, j, k;
     this.nodes = new Array(this.x);
-    var gridDim = this._getGridDim();
     for (i = 0; i < this.x; i++) {
         this.nodes[i] = new Array(this.y);
         for (j = 0; j < this.y; j++) {
@@ -150,7 +151,7 @@ SOM.prototype._initNodes = function initNodes() {
             for (k = 0; k < this.numWeights; k++) {
                 weights[k] = this.randomizer();
             }
-            this.nodes[i][j] = new this.nodeType(i, j, weights, gridDim);
+            this.nodes[i][j] = new this.nodeType(i, j, weights, this);
         }
     }
     this.times.initNodes = Date.now() - now;
@@ -302,23 +303,27 @@ SOM.prototype._findBestMatchingUnit = function findBestMatchingUnit(candidate) {
 
 };
 
-SOM.prototype.predict = function predict(data) {
-    if (data instanceof Array) {
+SOM.prototype.predict = function predict(data, computePosition) {
+    if ((data instanceof Array) && data[0] instanceof Array) {
         var self = this;
         return data.map(function (element) {
-            return self._predict(element);
+            return self._predict(element, computePosition);
         });
     } else {
-        return this._predict(data);
+        return this._predict(data, computePosition);
     }
 };
 
-SOM.prototype._predict = function _predict(element) {
+SOM.prototype._predict = function _predict(element, computePosition) {
     if (!(element instanceof Array)) {
         element = this.extractor(element);
     }
     var bmu = this._findBestMatchingUnit(element);
-    return [bmu.x, bmu.y];
+    var result = [bmu.x, bmu.y];
+    if (computePosition) {
+        result[2] = bmu.getPosition(element);
+    }
+    return result;
 };
 
 // As seen in http://www.scholarpedia.org/article/Kohonen_network
@@ -382,6 +387,16 @@ function squareEuclidean(a, b) {
 
 function getRandomValue(arr, randomizer) {
     return arr[Math.floor(randomizer() * arr.length)];
+}
+
+function getMaxDistance(distance, numWeights) {
+    var zero = new Array(numWeights),
+        one = new Array(numWeights);
+    for (var i = 0; i < numWeights; i++) {
+        zero[i] = 0;
+        one[i] = 1;
+    }
+    return distance(zero, one);
 }
 
 module.exports = SOM;
