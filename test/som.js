@@ -3,6 +3,9 @@
 var SOM = require('../');
 
 describe('SOM', function () {
+
+    this.timeout(0);
+
     it.skip('should init correctly', function () {
         var som = new SOM(4, 4);
         (function () {
@@ -56,7 +59,7 @@ describe('SOM', function () {
         }
         var result = som.predict(som.trainingSet);
     });
-    it.skip('should work SOM 3', function () {
+    it('should work SOM 3', function () {
         var som = new SOM(20, 20, {
             fields: {
                 r: [0, 255],
@@ -68,8 +71,9 @@ describe('SOM', function () {
         });
         var data = getRandomData(1000);
         som.train(data);
+        console.log(som.times)
     });
-    it('should export and reload correctly the model', function () {
+    it.skip('should export and reload correctly the model', function () {
         var som = new SOM(20, 20, {
             fields: {
                 r: [0, 255],

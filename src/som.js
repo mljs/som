@@ -52,6 +52,11 @@ function SOM(x, y, options, reload) {
         throw new Error('x and y must be positive');
     }
 
+    this.times = {
+        findBMU: 0,
+        adjust: 0
+    };
+
     this.randomizer = this.options.randomizer;
 
     this.iterationCount = 0;
@@ -134,7 +139,8 @@ SOM.prototype._getGridDim = function getGridDim() {
 };
 
 SOM.prototype._initNodes = function initNodes() {
-    var i, j, k;
+    var now = Date.now(),
+        i, j, k;
     this.nodes = new Array(this.x);
     var gridDim = this._getGridDim();
     for (i = 0; i < this.x; i++) {
@@ -147,12 +153,14 @@ SOM.prototype._initNodes = function initNodes() {
             this.nodes[i][j] = new this.nodeType(i, j, weights, gridDim);
         }
     }
+    this.times.initNodes = Date.now() - now;
 };
 
 SOM.prototype.setTraining = function setTraining(trainingSet) {
     if (this.trainingSet) {
         throw new Error('training set has already been set');
     }
+    var now = Date.now();
     var convertedSet = trainingSet;
     var i, l = trainingSet.length;
     if (this.extractor) {
@@ -169,6 +177,7 @@ SOM.prototype.setTraining = function setTraining(trainingSet) {
         this.timeConstant = l / Math.log(this.mapRadius);
     }
     this.trainingSet = convertedSet;
+    this.times.setTraining = Date.now() - now;
 };
 
 SOM.prototype.trainOne = function trainOne() {
@@ -210,8 +219,13 @@ SOM.prototype.trainOne = function trainOne() {
 };
 
 SOM.prototype._adjust = function adjust(trainingValue, neighbourhoodRadius) {
-    var x, y, dist, influence;
+    var now = Date.now(),
+        x, y, dist, influence;
+
     var bmu = this._findBestMatchingUnit(trainingValue);
+
+    var now2 = Date.now();
+    this.times.findBMU += now2 - now;
 
     var radiusLimit = Math.floor(neighbourhoodRadius);
     var xMin = bmu.x - radiusLimit,
@@ -243,6 +257,8 @@ SOM.prototype._adjust = function adjust(trainingValue, neighbourhoodRadius) {
 
         }
     }
+
+    this.times.adjust += (Date.now() - now2);
 
 };
 
