@@ -328,15 +328,27 @@ SOM.prototype._predict = function _predict(element, computePosition) {
 
 // As seen in http://www.scholarpedia.org/article/Kohonen_network
 SOM.prototype.getQuantizationError = function getQuantizationError() {
-    var data = this.trainingSet,
-        l = data.length,
-        sum = 0,
-        bmu;
+    var fit = this.getFit(),
+        l = fit.length,
+        sum = 0;
     for (var i = 0; i < l; i++) {
-        bmu = this._findBestMatchingUnit(data[i]);
-        sum += Math.sqrt(squareEuclidean(data[i], bmu.weights));
+        sum += fit[i];
     }
     return sum / l;
+};
+
+SOM.prototype.getFit = function getFit(dataset) {
+    if (!dataset) {
+        dataset = this.trainingSet;
+    }
+    var l = dataset.length,
+        bmu,
+        result = new Array(l);
+    for (var i = 0; i < l; i++) {
+        bmu = this._findBestMatchingUnit(dataset[i]);
+        result[i] = Math.sqrt(this.distance(dataset[i], bmu.weights));
+    }
+    return result;
 };
 
 function getConverters(fields, fieldsOpt) {

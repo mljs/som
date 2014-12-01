@@ -112,9 +112,17 @@ var result2 = som.predict([{ r: 45, g: 209, b: 100 }, { r: 155, g: 22, b: 12 }])
 // result2 = [ [ 2, 26 ], [ 33, 12 ] ]
 ```
 
+### getFit([dataset])
+
+Returns an array of fit values which are the square root of the distance between the input vector and its corresponding BMU.
+
+__Arguments__
+
+* `dataset` - Array of vectors to for which to calculate fit values. Defaults to the training set.
+
 ### getQuantizationError()
 
-Returns the mean of the euclidean distance between each point of the training set and its corresponding BMU. This number can be used to compare several runs of the same SOM.
+Returns the mean of the fit values for the training set. This number can be used to compare several runs of the same SOM.
 
 ### export([includeDistance])
 
