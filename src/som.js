@@ -304,6 +304,13 @@ SOM.prototype._findBestMatchingUnit = function findBestMatchingUnit(candidate) {
 };
 
 SOM.prototype.predict = function predict(data, computePosition) {
+    if(typeof data === 'boolean') {
+        computePosition = data;
+        data = null;
+    }
+    if(!data) {
+        data = this.trainingSet;
+    }
     if (Array.isArray(data) && Array.isArray(data[0])) {
         var self = this;
         return data.map(function (element) {

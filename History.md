@@ -2,6 +2,7 @@
 ==================
 
 * add som.getFit
+* use training set as default argument for `predict` and `getFit`
 
 0.0.2 / 2014-10-28
 ==================
