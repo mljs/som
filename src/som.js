@@ -304,7 +304,7 @@ SOM.prototype._findBestMatchingUnit = function findBestMatchingUnit(candidate) {
 };
 
 SOM.prototype.predict = function predict(data, computePosition) {
-    if ((data instanceof Array) && data[0] instanceof Array) {
+    if (Array.isArray(data) && Array.isArray(data[0])) {
         var self = this;
         return data.map(function (element) {
             return self._predict(element, computePosition);
@@ -315,7 +315,7 @@ SOM.prototype.predict = function predict(data, computePosition) {
 };
 
 SOM.prototype._predict = function _predict(element, computePosition) {
-    if (!(element instanceof Array)) {
+    if (!Array.isArray(element)) {
         element = this.extractor(element);
     }
     var bmu = this._findBestMatchingUnit(element);
