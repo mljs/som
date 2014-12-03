@@ -34,7 +34,7 @@ describe('SOM', function () {
         ];
         som.train(data);
     });
-    it.skip('should work SOM 2', function () {
+    it('should work SOM 2', function () {
         var som = new SOM(40, 40, {
             fields: {
                 r: [0, 255],
@@ -57,7 +57,8 @@ describe('SOM', function () {
         som.setTraining(data);
         while (som.trainOne()) {
         }
-        var result = som.predict(som.trainingSet);
+        //var result = som.predict(som.trainingSet);
+        som.predict({ r: 255, g: 0, b: 0 }, true);
     });
     it.skip('should work SOM 3', function () {
         var som = new SOM(20, 20, {
@@ -73,7 +74,7 @@ describe('SOM', function () {
         som.train(data);
         console.log(som.times)
     });
-    it('should export and reload correctly the model', function () {
+    it.skip('should export and reload correctly the model', function () {
         var som = new SOM(20, 20, {
             fields: {
                 r: [0, 255],
