@@ -1,6 +1,6 @@
 {
     "name": "ml-som",
-    "version": "0.0.3",
+    "version": "0.0.4",
     "description": "Self-organizing map (SOM) / Kohonen network",
     "main": "src/index.js",
     "directories": {
