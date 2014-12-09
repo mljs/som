@@ -1,3 +1,8 @@
+0.0.5 / 2014-12-09
+==================
+
+* predict : big improvement on position computing inside square cells
+
 0.0.4 / 2014-12-03
 ==================
 

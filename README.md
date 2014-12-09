@@ -108,8 +108,8 @@ __Example__
 // create and train the som
 var result1 = som.predict({ r: 45, g: 209, b: 100 });
 // result1 = [ 2, 26 ]
-var result2 = som.predict([{ r: 45, g: 209, b: 100 }, { r: 155, g: 22, b: 12 }]);
-// result2 = [ [ 2, 26 ], [ 33, 12 ] ]
+var result2 = som.predict([{ r: 45, g: 209, b: 100 }, { r: 155, g: 22, b: 12 }], true);
+// result2 = [ [ 2, 26, [ 0.236, 0.694 ] ], [ 33, 12, [ 0.354, 0.152 ] ] ]
 ```
 
 ### getFit([dataset])
