@@ -50,11 +50,16 @@ var testSet = rndColors(1000);
 
 var som = new SOM(20, 20, {
     iterations: 10,
-    fields: {
-        r: [0, 255],
-        g: [0, 255],
-        b: [0, 255]
-    }
+    fields: [{
+        name: 'r',
+        range: [0, 255]
+    }, {
+        name: 'g',
+        range: [0, 255]
+    }, {
+        name: 'b',
+        range: [0, 255]
+    }]
 });
 
 som.train(trainingSet);

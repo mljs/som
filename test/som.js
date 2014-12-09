@@ -14,11 +14,16 @@ describe('SOM', function () {
     });
     it.skip('should work SOM 1', function () {
         var som = new SOM(40, 40, {
-            fields: {
-                r: [0, 255],
-                g: [0, 255],
-                b: [0, 255]
-            },
+            fields: [{
+                name: 'r',
+                range: [0, 255]
+            }, {
+                name: 'g',
+                range: [0, 255]
+            }, {
+                name: 'b',
+                range: [0, 255]
+            }],
             iterations: 1000,
             gridType: 'rect'
         });
@@ -36,11 +41,16 @@ describe('SOM', function () {
     });
     it('should work SOM 2', function () {
         var som = new SOM(40, 40, {
-            fields: {
-                r: [0, 255],
-                g: [0, 255],
-                b: [0, 255]
-            },
+            fields: [{
+                name: 'r',
+                range: [0, 255]
+            }, {
+                name: 'g',
+                range: [0, 255]
+            }, {
+                name: 'b',
+                range: [0, 255]
+            }],
             iterations: 10,
             gridType: 'rect'
         });
@@ -62,11 +72,16 @@ describe('SOM', function () {
     });
     it.skip('should work SOM 3', function () {
         var som = new SOM(20, 20, {
-            fields: {
-                r: [0, 255],
-                g: [0, 255],
-                b: [0, 255]
-            },
+            fields: [{
+                name: 'r',
+                range: [0, 255]
+            }, {
+                name: 'g',
+                range: [0, 255]
+            }, {
+                name: 'b',
+                range: [0, 255]
+            }],
             iterations: 10,
             method: 'traverse'
         });
@@ -76,11 +91,16 @@ describe('SOM', function () {
     });
     it.skip('should export and reload correctly the model', function () {
         var som = new SOM(20, 20, {
-            fields: {
-                r: [0, 255],
-                g: [0, 255],
-                b: [0, 255]
-            },
+            fields: [{
+                name: 'r',
+                range: [0, 255]
+            }, {
+                name: 'g',
+                range: [0, 255]
+            }, {
+                name: 'b',
+                range: [0, 255]
+            }],
             iterations: 10,
             method: 'traverse',
             distance: function(){return 0;}
