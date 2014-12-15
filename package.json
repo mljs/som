@@ -1,38 +1,39 @@
 {
-    "name": "ml-som",
-    "version": "0.0.6",
-    "description": "Self-organizing map (SOM) / Kohonen network",
-    "main": "src/index.js",
-    "directories": {
-        "lib": "src",
-        "test": "test"
-    },
-    "scripts": {
-        "test": "mocha --require should-approximately-deep --reporter mocha-better-spec-reporter --recursive"
-    },
-    "repository": "mljs/som",
-    "keywords": [
-        "som",
-        "self-organizing map",
-        "Kohonen",
-        "network",
-        "neural",
-        "data",
-        "mining",
-        "datamining",
-        "machine",
-        "learning"
-    ],
-    "author": "Michaël Zasso",
-    "license": "MIT",
-    "bugs": {
-        "url": "https://github.com/mljs/som/issues"
-    },
-    "homepage": "https://github.com/mljs/som",
-    "devDependencies": {
-        "mocha-better-spec-reporter": "latest",
-        "mocha": "latest",
-        "should": "latest",
-        "should-approximately-deep": "latest"
-    }
+  "name": "ml-som",
+  "version": "0.0.6",
+  "description": "Self-organizing map (SOM) / Kohonen network",
+  "main": "src/index.js",
+  "directories": {
+    "lib": "src",
+    "test": "test"
+  },
+  "scripts": {
+    "test": "mocha --require should-approximately-deep --reporter mocha-better-spec-reporter --recursive"
+  },
+  "repository": "mljs/som",
+  "keywords": [
+    "som",
+    "self-organizing map",
+    "Kohonen",
+    "network",
+    "neural",
+    "data",
+    "mining",
+    "datamining",
+    "machine",
+    "learning"
+  ],
+  "author": "Michaël Zasso",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/mljs/som/issues"
+  },
+  "homepage": "https://github.com/mljs/som",
+  "devDependencies": {
+    "eslint": "^0.10.2",
+    "mocha": "latest",
+    "mocha-better-spec-reporter": "latest",
+    "should": "latest",
+    "should-approximately-deep": "latest"
+  }
 }

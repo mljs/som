@@ -1,3 +1,5 @@
+'use strict';
+
 var NodeSquare = require('./node-square');
 
 function NodeHexagonal(x, y, weights, som) {
@@ -9,7 +11,7 @@ function NodeHexagonal(x, y, weights, som) {
 
 }
 
-NodeHexagonal.prototype = new NodeSquare;
+NodeHexagonal.prototype = new NodeSquare();
 NodeHexagonal.prototype.constructor = NodeHexagonal;
 
 NodeHexagonal.prototype.getDistance = function getDistanceHexagonal(otherNode) {

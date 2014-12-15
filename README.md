@@ -124,13 +124,9 @@ __Arguments__
 
 Returns the mean of the fit values for the training set. This number can be used to compare several runs of the same SOM.
 
-### export([includeDistance])
+### export()
 
 Exports the model to a JSON object that can be written to disk and reloaded
-
-__Arguments__
-
-* `includeDistance` - Boolean indicating if the distance function should be included in the model as a String (not recommended). Note that there is no need to include the default function and that it cannot work if the function depends on variables that are out of its scope (default: false).
 
 ### SOM.load(model, [distanceFunction])
 

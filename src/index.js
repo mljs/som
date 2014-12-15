@@ -41,13 +41,13 @@ function SOM(x, y, options, reload) {
     }
 
     if (this.options.gridType === 'rect') {
-        this.nodeType = NodeSquare;
+        this.NodeType = NodeSquare;
         this.gridDim = {
             x: x,
             y: y
         };
     } else {
-        this.nodeType = NodeHexagonal;
+        this.NodeType = NodeHexagonal;
         var hx = this.x - Math.floor(this.y / 2);
         this.gridDim = {
             x: hx,
@@ -87,7 +87,7 @@ function SOM(x, y, options, reload) {
 
     this.algorithmMethod = this.options.method;
 
-    this._initNodes();
+    this.initNodes();
 
     this.done = false;
 }
@@ -98,15 +98,13 @@ SOM.load = function loadModel(model, distance) {
             y = model.data[0].length;
         if (distance) {
             model.options.distance = distance;
-        } else if (model.options.distance) {
-            model.options.distance = eval('(' + model.options.distance + ')');
         }
         var som = new SOM(x, y, model.options, true);
         som.nodes = new Array(x);
         for (var i = 0; i < x; i++) {
             som.nodes[i] = new Array(y);
             for (var j = 0; j < y; j++) {
-                som.nodes[i][j] = new som.nodeType(i, j, model.data[i][j], som);
+                som.nodes[i][j] = new som.NodeType(i, j, model.data[i][j], som);
             }
         }
         return som;
@@ -115,7 +113,7 @@ SOM.load = function loadModel(model, distance) {
     }
 };
 
-SOM.prototype.export = function exportModel(includeDistance) {
+SOM.prototype.export = function exportModel() {
     var model = {
         name: 'SOM'
     };
@@ -131,16 +129,13 @@ SOM.prototype.export = function exportModel(includeDistance) {
             model.data[i][j] = this.nodes[i][j].weights;
         }
     }
-    if (includeDistance) {
-        model.options.distance = this.distance.toString();
-    }
     if (!this.done) {
         model.ready = false;
     }
     return model;
 };
 
-SOM.prototype._initNodes = function initNodes() {
+SOM.prototype.initNodes = function initNodes() {
     var now = Date.now(),
         i, j, k;
     this.nodes = new Array(this.x);
@@ -151,7 +146,7 @@ SOM.prototype._initNodes = function initNodes() {
             for (k = 0; k < this.numWeights; k++) {
                 weights[k] = this.randomizer();
             }
-            this.nodes[i][j] = new this.nodeType(i, j, weights, this);
+            this.nodes[i][j] = new this.NodeType(i, j, weights, this);
         }
     }
     this.times.initNodes = Date.now() - now;
@@ -195,13 +190,13 @@ SOM.prototype.trainOne = function trainOne() {
         if (this.algorithmMethod === 'random') { // Pick a random value of the training set at each step
             neighbourhoodRadius = this.mapRadius * Math.exp(-this.iterationCount / this.timeConstant);
             trainingValue = getRandomValue(this.trainingSet, this.randomizer);
-            this._adjust(trainingValue, neighbourhoodRadius);
+            this.adjust(trainingValue, neighbourhoodRadius);
             this.learningRate = this.startLearningRate * Math.exp(-this.iterationCount / this.numIterations);
         } else { // Get next input vector
             trainingSetFactor = -Math.floor(this.iterationCount / this.trainingSet.length);
             neighbourhoodRadius = this.mapRadius * Math.exp(trainingSetFactor / this.timeConstant);
             trainingValue = this.trainingSet[this.iterationCount % this.trainingSet.length];
-            this._adjust(trainingValue, neighbourhoodRadius);
+            this.adjust(trainingValue, neighbourhoodRadius);
             if (((this.iterationCount + 1) % this.trainingSet.length) === 0) {
                 this.learningRate = this.startLearningRate * Math.exp(trainingSetFactor / Math.floor(this.numIterations / this.trainingSet.length));
             }
@@ -219,11 +214,11 @@ SOM.prototype.trainOne = function trainOne() {
     }
 };
 
-SOM.prototype._adjust = function adjust(trainingValue, neighbourhoodRadius) {
+SOM.prototype.adjust = function adjust(trainingValue, neighbourhoodRadius) {
     var now = Date.now(),
         x, y, dist, influence;
 
-    var bmu = this._findBestMatchingUnit(trainingValue);
+    var bmu = this.findBestMatchingUnit(trainingValue);
 
     var now2 = Date.now();
     this.times.findBMU += now2 - now;
@@ -266,7 +261,9 @@ SOM.prototype._adjust = function adjust(trainingValue, neighbourhoodRadius) {
 SOM.prototype.train = function train(trainingSet) {
     if (!this.done) {
         this.setTraining(trainingSet);
-        while (this.trainOne()) {
+        var needTrain = true;
+        while (needTrain){
+            needTrain = this.trainOne();
         }
     }
 };
@@ -283,7 +280,7 @@ SOM.prototype.getConvertedNodes = function getConvertedNodes() {
     return result;
 };
 
-SOM.prototype._findBestMatchingUnit = function findBestMatchingUnit(candidate) {
+SOM.prototype.findBestMatchingUnit = function findBestMatchingUnit(candidate) {
 
     var bmu,
         lowest = Infinity,
@@ -314,18 +311,18 @@ SOM.prototype.predict = function predict(data, computePosition) {
     if (Array.isArray(data) && (Array.isArray(data[0]) || (typeof data[0] === 'object'))) { // predict a dataset
         var self = this;
         return data.map(function (element) {
-            return self._predict(element, computePosition);
+            return self.predictOne(element, computePosition);
         });
     } else { // predict a single element
-        return this._predict(data, computePosition);
+        return this.predictOne(data, computePosition);
     }
 };
 
-SOM.prototype._predict = function _predict(element, computePosition) {
+SOM.prototype.predictOne = function predictOne(element, computePosition) {
     if (!Array.isArray(element)) {
         element = this.extractor(element);
     }
-    var bmu = this._findBestMatchingUnit(element);
+    var bmu = this.findBestMatchingUnit(element);
     var result = [bmu.x, bmu.y];
     if (computePosition) {
         result[2] = bmu.getPosition(element);
@@ -352,7 +349,7 @@ SOM.prototype.getFit = function getFit(dataset) {
         bmu,
         result = new Array(l);
     for (var i = 0; i < l; i++) {
-        bmu = this._findBestMatchingUnit(dataset[i]);
+        bmu = this.findBestMatchingUnit(dataset[i]);
         result[i] = Math.sqrt(this.distance(dataset[i], bmu.weights));
     }
     return result;
@@ -369,30 +366,30 @@ function getConverters(fields) {
     return {
         extractor: function extractor(value) {
             var result = new Array(l);
-            for (var i = 0; i < l; i++) {
-                result[i] = normalizers[i](value[fields[i].name]);
+            for (var j = 0; j < l; j++) {
+                result[j] = normalizers[j](value[fields[j].name]);
             }
             return result;
         },
         creator: function creator(value) {
             var result = {};
-            for (var i = 0; i < l; i++) {
-                result[fields[i].name] = denormalizers[i](value[i]);
+            for (var j = 0; j < l; j++) {
+                result[fields[j].name] = denormalizers[j](value[j]);
             }
             return result;
         }
     };
 }
 
-function getNormalizer(minMax) {
+function getNormalizer(min, max) {
     return function normalizer(value) {
-        return (value - minMax[0]) / (minMax[1] - minMax[0]);
+        return (value - min) / (max - min);
     };
 }
 
-function getDenormalizer(minMax) {
+function getDenormalizer(min, max) {
     return function denormalizer(value) {
-        return (minMax[0] + value * (minMax[1] - minMax[0]));
+        return (min + value * (max - min));
     };
 }
 

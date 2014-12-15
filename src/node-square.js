@@ -1,3 +1,5 @@
+'use strict';
+
 function NodeSquare(x, y, weights, som) {
     this.x = x;
     this.y = y;
@@ -31,7 +33,7 @@ NodeSquare.prototype.getNeighbors = function getNeighbors(xy) {
         if (this[xy] > 0) {
             v = this[xy] - 1;
         } else if (this.som.torus) {
-            v = this.som.gridDim[xy] - 1
+            v = this.som.gridDim[xy] - 1;
         }
         if (typeof v !== 'undefined') {
             var x, y;
