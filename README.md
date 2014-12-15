@@ -124,6 +124,10 @@ __Arguments__
 
 Returns the mean of the fit values for the training set. This number can be used to compare several runs of the same SOM.
 
+### getUMatrix()
+
+Returns a 2D array representing the grid. Each value is the mean of the distances between the corresponding node and its direct neighbors. Currently only available for square nodes
+
 ### export()
 
 Exports the model to a JSON object that can be written to disk and reloaded
