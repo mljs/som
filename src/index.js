@@ -116,9 +116,6 @@ SOM.load = function loadModel(model, distance) {
 };
 
 SOM.prototype.export = function exportModel(includeDistance) {
-    if (!this.done) {
-        throw new Error('model is not ready yet');
-    }
     var model = {
         name: 'SOM'
     };
@@ -136,6 +133,9 @@ SOM.prototype.export = function exportModel(includeDistance) {
     }
     if (includeDistance) {
         model.options.distance = this.distance.toString();
+    }
+    if (!this.done) {
+        model.ready = false;
     }
     return model;
 };
