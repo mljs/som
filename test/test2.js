@@ -1,7 +1,9 @@
+'use strict';
+
 var SOM = require('../');
 
 function rnd(n) {
-    return Math.floor(Math.random()*n);
+    return Math.floor(Math.random() * n);
 }
 
 function rndColors(n) {
@@ -38,7 +40,7 @@ function getChart(theSet, prediction) {
     for (; i < l; i++) {
         chart.x[i] = prediction[i][0] + prediction[i][2][0];
         chart.y[i] = prediction[i][1] + prediction[i][2][1];
-        chart.info[i] = theSet[i]
+        chart.info[i] = theSet[i];
     }
     return result;
 }
@@ -74,3 +76,5 @@ var fs = require('fs');
 fs.writeFileSync('./model.json', JSON.stringify(model));
 
 fs.writeFileSync('./test.json', JSON.stringify(getChart(testSet, predTest)));
+
+fs.writeFileSync('./umatrix.json', JSON.stringify(som.getUMatrix()));

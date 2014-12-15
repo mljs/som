@@ -355,13 +355,48 @@ SOM.prototype.getFit = function getFit(dataset) {
     return result;
 };
 
+SOM.prototype.getUMatrix = function getUMatrix() {
+    var matrix = new Array(this.x);
+    for (var i = 0; i < this.x; i++) {
+        matrix[i] = new Array(this.y);
+        for (var j = 0; j < this.y; j++) {
+            var node = this.nodes[i][j],
+                nX = node.getNeighbors('x'),
+                nY = node.getNeighbors('y');
+            var sum = 0,
+                total = 0,
+                self = this;
+            if(nX[0]) {
+                total++;
+                sum += self.distance(node.weights, nX[0].weights);
+            }
+            if(nX[1]) {
+                total++;
+                sum += self.distance(node.weights, nX[1].weights);
+            }
+            if(nY[0]) {
+                total++;
+                sum += self.distance(node.weights, nY[0].weights);
+            }
+            if(nY[1]) {
+                total++;
+                sum += self.distance(node.weights, nY[1].weights);
+            }
+            matrix[i][j] = sum / total;
+        }
+    }
+    return matrix;
+};
+
 function getConverters(fields) {
     var l = fields.length,
         normalizers = new Array(l),
-        denormalizers = new Array(l);
+        denormalizers = new Array(l),
+        range;
     for (var i = 0; i < l; i++) {
-        normalizers[i] = getNormalizer(fields[i].range);
-        denormalizers[i] = getDenormalizer(fields[i].range);
+        range = fields[i].range;
+        normalizers[i] = getNormalizer(range[0], range[1]);
+        denormalizers[i] = getDenormalizer(range[0], range[1]);
     }
     return {
         extractor: function extractor(value) {
