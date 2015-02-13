@@ -10,7 +10,10 @@
   "scripts": {
     "test": "mocha --require should-approximately-deep --reporter mocha-better-spec-reporter --recursive"
   },
-  "repository": "mljs/som",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mljs/som.git"
+  },
   "keywords": [
     "som",
     "self-organizing map",
@@ -30,9 +33,8 @@
   },
   "homepage": "https://github.com/mljs/som",
   "devDependencies": {
-    "eslint": "^0.10.2",
-    "mocha": "latest",
     "mocha-better-spec-reporter": "latest",
+    "mocha": "latest",
     "should": "latest",
     "should-approximately-deep": "latest"
   }

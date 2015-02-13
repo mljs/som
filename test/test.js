@@ -6,13 +6,13 @@ describe('SOM', function () {
 
     this.timeout(0);
 
-    it.skip('should init correctly', function () {
+    it('should init correctly', function () {
         var som = new SOM(4, 4);
         (function () {
             var som = new SOM(4);
         }).should.throw('x and y must be positive');
     });
-    it.skip('should work SOM 1', function () {
+    it('should work SOM 1', function () {
         var som = new SOM(40, 40, {
             fields: [{
                 name: 'r',
@@ -70,7 +70,7 @@ describe('SOM', function () {
         //var result = som.predict(som.trainingSet);
         som.predict({ r: 255, g: 0, b: 0 }, true);
     });
-    it.skip('should work SOM 3', function () {
+    it('should work SOM 3', function () {
         var som = new SOM(20, 20, {
             fields: [{
                 name: 'r',
@@ -87,9 +87,8 @@ describe('SOM', function () {
         });
         var data = getRandomData(1000);
         som.train(data);
-        console.log(som.times)
     });
-    it.skip('should export and reload correctly the model', function () {
+    it('should export and reload correctly the model', function () {
         var som = new SOM(20, 20, {
             fields: [{
                 name: 'r',
@@ -110,9 +109,8 @@ describe('SOM', function () {
         var sample = {r:255,g:255,b:0};
         var prediction = som.predict(sample);
         var model = som.export(true);
-        require('fs').writeFileSync('/home/mzasso/ml/som/model.json', JSON.stringify(model));
-        var file = require('fs').readFileSync('/home/mzasso/ml/som/model.json').toString();
-        var som2 = SOM.load(JSON.parse(file));
+        var reloadedModel = JSON.parse(JSON.stringify(model));
+        var som2 = SOM.load(reloadedModel);
         som2.predict(sample).should.eql(prediction);
     });
 });
