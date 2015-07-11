@@ -32,7 +32,7 @@ __Options__
  *  `random` - Pick an object of the training set randomly
  *  `traverse` - Go sequentially through the training set
 * `randomizer` - Function that must give numbers between 0 and 1 (default: Math.random)
-* `distance` - Function that computes the distance between two vectors of the same length (default: square euclidean distance)
+* `distance` - Function that computes the distance between two vectors of the same length (default: squared Euclidean distance)
 * `gridType` - Shape of the grid (default: rect)
  * `rect` - Rectangular grid
  * `hexa` - Hexagonal grid

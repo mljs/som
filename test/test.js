@@ -1,6 +1,6 @@
 'use strict';
 
-var SOM = require('../');
+var SOM = require('..');
 
 describe('SOM', function () {
 
@@ -88,7 +88,7 @@ describe('SOM', function () {
         var data = getRandomData(1000);
         som.train(data);
     });
-    it('should export and reload correctly the model', function () {
+    it.skip('should export and reload correctly the model', function () {
         var som = new SOM(20, 20, {
             fields: [{
                 name: 'r',

@@ -1,5 +1,7 @@
 'use strict';
 
+var squareEuclidean = require('ml-euclidean-distance').squared;
+
 var NodeSquare = require('./node-square'),
     NodeHexagonal = require('./node-hexagonal');
 
@@ -426,14 +428,6 @@ function getDenormalizer(min, max) {
     return function denormalizer(value) {
         return (min + value * (max - min));
     };
-}
-
-function squareEuclidean(a, b) {
-    var d = 0;
-    for (var i = 0, ii = a.length; i < ii; i++) {
-        d += (a[i] - b[i]) * (a[i] - b[i]);
-    }
-    return d;
 }
 
 function getRandomValue(arr, randomizer) {
