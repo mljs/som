@@ -226,10 +226,12 @@ SOM.prototype.adjust = function adjust(trainingValue, neighbourhoodRadius) {
     this.times.findBMU += now2 - now;
 
     var radiusLimit = Math.floor(neighbourhoodRadius);
-    var xMin = bmu.x - radiusLimit,
-        xMax = bmu.x + radiusLimit,
-        yMin = bmu.y - radiusLimit,
-        yMax = bmu.y + radiusLimit;
+    var xMin = (bmu.x - radiusLimit ) % this.x,
+        xMax = (bmu.x + radiusLimit) % this.x,
+        yMin = (bmu.y - radiusLimit) % this.y,
+        yMax = (bmu.y + radiusLimit) % this.y;
+if (xMin<0) xMin+=this.x;
+    // TODO in loop
 
     for (x = xMin; x <= xMax; x++) {
         var theX = x;
