@@ -43,11 +43,11 @@ __Example__
 ```js
 var SOM = require('ml-som');
 var options = {
-  fields: {
-    r: [0, 255],
-    g: [0, 255],
-    b: [0, 255]
-  }
+  fields: [
+    { name: 'r', range: [0, 255] },
+    { name: 'g', range: [0, 255] },
+    { name: 'b', range: [0, 255] }
+  ]
 };
 
 var som = new SOM(20, 20, options);
